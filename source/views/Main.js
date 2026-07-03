@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import Notifications from "react-notify-toast";
+import { Toaster } from "react-hot-toast";
 import { lighten } from "polished";
 
 import { Row, Spacer, Link } from "../components/common";
@@ -37,7 +37,7 @@ const FinePrint = styled.p`
 export default props => {
 	return (
 		<StyleWrapper>
-			<Notifications />
+			<Toaster />
 			<Container>
 				<div>
 					<Header>

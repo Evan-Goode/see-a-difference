@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import _ from "lodash";
-import {notify} from "react-notify-toast";
+import toast from "react-hot-toast";
 
 import {Row, Column, Flexed, Spacer} from "../components/common";
 import Controls from "../components/Controls";
@@ -102,6 +102,8 @@ export default class Visualization extends React.PureComponent {
 			b: _.uniqueId(),
 			intersect: _.uniqueId(),
 		};
+		this.toastId = null;
+		this.lastInvalid = null;
 	}
 	setControls = (controls) => {
 		this.setState({controls});
@@ -109,21 +111,29 @@ export default class Visualization extends React.PureComponent {
 	setColors = (colors) => {
 		this.setState({colors});
 	};
+	componentDidMount() {
+		this.maybeNotify();
+	}
+	componentDidUpdate() {
+		this.maybeNotify();
+	}
+	maybeNotify() {
+		const controls = processControls(this.state.controls);
+		const invalid = !validateControls(controls);
+		if (invalid === this.lastInvalid) return;
+		this.lastInvalid = invalid;
+		if (invalid) {
+			this.toastId = toast(
+				"This tool may report inaccurate results when the mean and standard deviation differ by many orders of magnitude.",
+				{ icon: null, duration: Infinity, style: { background: "#F5E273" } }
+			);
+		} else if (this.toastId != null) {
+			toast.dismiss(this.toastId);
+			this.toastId = null;
+		}
+	}
 	render() {
 		const controls = processControls(this.state.controls);
-		if (!validateControls(controls)) {
-			try {
-				notify.show(
-					"This tool may report inaccurate results when the mean and standard deviation differ by many orders of magnitude.",
-					"warning",
-					-1
-				);
-			} catch {}
-		} else {
-			try {
-				notify.hide();
-			} catch {}
-		}
 		const smallPatternIdsA = {
 			sample: this.patternIds.a,
 			intersect: this.patternIds.intersect,

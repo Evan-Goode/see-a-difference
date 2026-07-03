@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import { createGlobalStyle } from "styled-components";
 import { Reset } from "styled-reset";
@@ -12,11 +12,11 @@ const GlobalStyle = createGlobalStyle`
 	}
 `;
 
-ReactDOM.render(
+const root = createRoot(document.querySelector("#root"));
+root.render(
 	<>
 		<Reset />
 		<GlobalStyle />
 		<Main />
-	</>,
-	document.querySelector("#root")
+	</>
 );
