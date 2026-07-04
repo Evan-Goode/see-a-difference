@@ -6,18 +6,21 @@ import { generateData } from "../utilities";
 const formatLine = (sample, { x, y }) => [sample, x, y].join(",");
 
 export default props => {
-	const lines = {
-		a: generateData(props.samples.a.mean, props.samples.a.sd).map(point =>
-			formatLine("Sample 1", point)
-		),
-		b: generateData(props.samples.b.mean, props.samples.b.sd).map(point =>
-			formatLine("Sample 2", point)
-		)
-	};
-	const csv = ["Distribution,x value,y value"]
-		.concat(lines.a)
-		.concat(lines.b)
-		.join("\n");
+	const csvLines = ["Distribution,x value,y value"]
+		.concat(props.data.a.control.map(point =>
+			formatLine(`${constants.GROUP_NAMES.a} Control`, point)
+		))
+		.concat(props.data.a.treated.map(point =>
+			formatLine(`${constants.GROUP_NAMES.a} Treated`, point)
+		))
+		.concat(props.data.b.control.map(point =>
+			formatLine(`${constants.GROUP_NAMES.b} Control`, point)
+		))
+		.concat(props.data.b.treated.map(point =>
+			formatLine(`${constants.GROUP_NAMES.b} Treated`, point)
+		));
+
+	const csv = csvLines.join("\n");
 	const href = `data:application/octet-stream,${encodeURIComponent(csv)}`;
 	return (
 		<p>

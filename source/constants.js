@@ -51,3 +51,8 @@ export const COLOR_SCHEMES = {
 export const DEFAULT_COLOR_SCHEME = "Red & Blue";
 
 export const COLORS = COLOR_SCHEMES[DEFAULT_COLOR_SCHEME];
+
+export const GROUP_NAMES = {
+	a: "Male",
+	b: "Female",
+};

@@ -17,7 +17,7 @@ const StyleWrapper = styled.div`
 const Container = styled.div`
 	margin: 3em auto;
 	padding: 0 1em;
-	width: 960px;
+	width: 1024px;
 `;
 const H1 = styled.h1`
 	font-size: 4em;

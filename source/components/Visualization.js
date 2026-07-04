@@ -9,10 +9,36 @@ import GroupControls from "../components/GroupControls";
 import ColorControls from "../components/ColorControls";
 import Patterns from "../components/Patterns";
 import LargeChart from "../components/LargeChart";
+import Analysis from "../components/Analysis";
 import EffectSize from "../components/EffectSize";
 import ExportCsv from "../components/ExportCsv";
 import * as constants from "../constants";
 import { generateData } from "../utilities";
+
+const ChartGrid = styled.div`
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	grid-template-rows: auto auto auto auto;
+`;
+
+const GroupLabel = styled.header`
+	font-weight: bold;
+	text-align: center;
+	grid-column: 1 / -1;
+	font-size: 2rem;
+	color: ${props => props.color};
+`;
+
+const GroupAnalysis = styled.div`
+	justify-self: start;
+	align-self: center;
+`;
+
+const StyledLargeChart = styled(LargeChart)``;
+
+const StyledGroupControls = styled(GroupControls)`
+	justify-self: end;
+`;
 
 const INITIAL_CONTROLS = {
 	a: {
@@ -38,6 +64,12 @@ const parseFloatFallback = (value, fallback, positive = false) => {
 	const parsed = parseFloat(value);
 	return isNaN(parsed) || (positive && parsed <= 0) ? fallback : parsed;
 };
+
+const parseIntFallback = (value, fallback, positive = false) => {
+	const parsed = parseInt(value);
+	return isNaN(parsed) || (positive && parsed <= 0) ? fallback : parsed;
+};
+
 const parseSd = (sd, se, n, useSe) => {
 	if (useSe) {
 		return (
@@ -58,6 +90,7 @@ const processControls = (controls) => {
 					controls.a["treated-n"],
 					controls["use-se"]
 				),
+				n: parseIntFallback(controls.a["treated-n"], 1, true),
 			},
 			control: {
 				mean: parseFloatFallback(controls.a["control-mean"], 0),
@@ -67,6 +100,7 @@ const processControls = (controls) => {
 					controls.a["control-n"],
 					controls["use-se"]
 				),
+				n: parseIntFallback(controls.a["control-n"], 1, true),
 			},
 		},
 		b: {
@@ -78,6 +112,7 @@ const processControls = (controls) => {
 					controls.b["treated-n"],
 					controls["use-se"]
 				),
+				n: parseIntFallback(controls.b["treated-n"], 1, true),
 			},
 			control: {
 				mean: parseFloatFallback(controls.b["control-mean"], 0),
@@ -87,6 +122,7 @@ const processControls = (controls) => {
 					controls.b["control-n"],
 					controls["use-se"]
 				),
+				n: parseIntFallback(controls.b["control-n"], 1, true),
 			},
 		},
 	};
@@ -164,8 +200,8 @@ export default class Visualization extends React.PureComponent {
 		this.toastId = null;
 		this.lastInvalid = null;
 	}
-	setGroupControls = (group, controls) => {
-		this.setState({ controls: Object.assign({}, this.state.controls, { [group]: controls }) });
+	setGroupControls = (group, groupControls) => {
+		this.setState({ controls: Object.assign({}, this.state.controls, { [group]: groupControls }) });
 	};
 	setControls = (controls) => {
 		this.setState({ controls: Object.assign({}, this.state.controls, controls) });
@@ -220,52 +256,48 @@ export default class Visualization extends React.PureComponent {
 					colors={this.state.colors}
 					patternIds={this.patternIds}
 				/>
-				<Row>
-					<GroupControls
+				<ChartGrid>
+					<GroupLabel color={this.state.colors.b.intersect}>{constants.GROUP_NAMES.b}</GroupLabel>
+					<StyledGroupControls
 						controls={this.state.controls}
 						groupControls={this.state.controls.b}
 						group={"b"}
-						groupName={"Female"}
 						setControls={this.setControls}
 						setGroupControls={this.setGroupControls}
 						colors={this.state.colors.b}
 					/>
-					<Flexed>
-						<LargeChart
-							data={data.b}
-							minX={minX}
-							maxX={maxX}
-							patternIds={this.patternIds.b}
-						/>
-					</Flexed>
-					<div>
+					<StyledLargeChart
+						data={data.b}
+						minX={minX}
+						maxX={maxX}
+						patternIds={this.patternIds.b}
+					/>
+					<GroupAnalysis>
 						<EffectSize samples={controls.b} />
-						{/*<ExportCsv samples={controls.b} />*/}
-					</div>
-				</Row>
-				<Row>
-					<GroupControls
+					</GroupAnalysis>
+					<GroupLabel color={this.state.colors.a.intersect}>{constants.GROUP_NAMES.a}</GroupLabel>
+					<StyledGroupControls
 						controls={this.state.controls}
 						groupControls={this.state.controls.a}
 						group={"a"}
-						groupName={"Male"}
 						setControls={this.setControls}
 						setGroupControls={this.setGroupControls}
 						colors={this.state.colors.a}
 					/>
-					<Flexed>
-						<LargeChart
-							data={data.a}
-							minX={minX}
-							maxX={maxX}
-							patternIds={this.patternIds.a}
-						/>
-					</Flexed>
-					<div>
+					<StyledLargeChart
+						data={data.a}
+						minX={minX}
+						maxX={maxX}
+						patternIds={this.patternIds.a}
+					/>
+					<GroupAnalysis>
 						<EffectSize samples={controls.a} />
-						{/*<ExportCsv samples={controls.a} />*/}
-					</div>
+					</GroupAnalysis>
+				</ChartGrid>
+				<Row>
+					<ExportCsv data={data} />
 				</Row>
+				<Analysis controls={controls} />
 				<Spacer />
 				<Row>
 					<ColorControls

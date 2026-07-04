@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useId} from "react";
 import _ from "lodash";
 import styled from "styled-components";
 
@@ -19,7 +19,7 @@ const Td = styled.td`
 `;
 
 const ColorControl = (props) => {
-	const id = _.uniqueId();
+	const id = useId();
 	return (
 		<Tr>
 			<Td>

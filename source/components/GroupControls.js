@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useId } from "react";
 import _ from "lodash";
 import styled from "styled-components";
 
 import { Input, Check, Label } from "./common";
+import * as constants from "../constants";
 
 const FieldSet = styled.fieldset`
 	border: none;
@@ -23,7 +24,7 @@ const Td = styled.td`
 
 const MeanControl = props => {
 	const meanName = `${props.sample}-mean`;
-	const meanId = _.uniqueId();
+	const meanId = useId();
 	return (
 		<Tr>
 			<Td>
@@ -43,13 +44,16 @@ const MeanControl = props => {
 };
 
 const SpreadControls = props => {
-	if (props.controls["use-se"]) {
-		const seName = `${props.sample}-se`;
-		const nName = `${props.sample}-n`;
-		const seId = _.uniqueId();
-		const nId = _.uniqueId();
-		return (
-			<>
+	const sdName = `${props.sample}-sd`;
+	const seName = `${props.sample}-se`;
+	const nName = `${props.sample}-n`;
+	const sdId = useId();
+	const seId = useId();
+	const nId = useId();
+
+	return (
+		<>
+			{props.controls["use-se"] ? (
 				<Tr>
 					<Td>
 						<Label htmlFor={seId} color={props.labelColor}>{props.label} SEM</Label>
@@ -63,49 +67,46 @@ const SpreadControls = props => {
 							color={props.color}
 						/>
 					</Td>
-				</Tr>
+				</Tr>) : (
+
 				<Tr>
 					<Td>
-						<Label htmlFor={nId} color={props.labelColor}>
-							{props.label} <em>n</em>
-						</Label>
+						<Label htmlFor={sdId} color={props.labelColor}>{props.label} SD</Label>
 					</Td>
 					<Td>
 						<Input
-							id={nId}
-							name={nName}
-							value={props.groupControls[nName]}
+							id={sdId}
+							name={sdName}
+							value={props.groupControls[sdName]}
 							onChange={props.handleChange}
 							color={props.color}
 						/>
 					</Td>
 				</Tr>
-			</>
-		);
-	}
-	const sdName = `${props.sample}-sd`;
-	const sdId = _.uniqueId();
-	return (
-		<Tr>
-			<Td>
-				<Label htmlFor={sdId} color={props.labelColor}>{props.label} SD</Label>
-			</Td>
-			<Td>
-				<Input
-					id={sdId}
-					name={sdName}
-					value={props.groupControls[sdName]}
-					onChange={props.handleUseSeChange}
-					color={props.color}
-				/>
-			</Td>
-		</Tr>
+			)}
+			<Tr>
+				<Td>
+					<Label htmlFor={nId} color={props.labelColor}>
+						{props.label} <em>n</em>
+					</Label>
+				</Td>
+				<Td>
+					<Input
+						id={nId}
+						name={nName}
+						value={props.groupControls[nName]}
+						onChange={props.handleChange}
+						color={props.color}
+					/>
+				</Td>
+			</Tr >
+		</>
 	);
 };
 
 const UseSeControl = props => {
 	const useSeName = "use-se";
-	const useSeId = _.uniqueId();
+	const useSeId = useId();
 	return (
 		<Tr>
 			<Td>
@@ -124,18 +125,24 @@ const UseSeControl = props => {
 };
 
 export default class extends React.PureComponent {
-	handleChangeControls = event => this.props.setControls({"use-se": event.target.checked});
+	handleChangeControls = event => {
+		this.props.setControls({
+			[event.target.name]:
+				event.target.type === "checkbox"
+					? event.target.checked
+					: event.target.value
+		});
+	}
 	handleChangeGroupControls = event => {
-		this.props.setGroupControls(this.props.group,
-			Object.assign({}, this.props.groupControls, {
-				[event.target.name]:
-					event.target.type === "checkbox"
-						? event.target.checked
-						: event.target.value
-			})
-		);
+		this.props.setGroupControls(this.props.group, Object.assign({}, this.props.groupControls, {
+			[event.target.name]:
+				event.target.type === "checkbox"
+					? event.target.checked
+					: event.target.value
+		}));
 	};
 	render() {
+		const groupName = constants.GROUP_NAMES[this.props.group];
 		return (
 			<FieldSet>
 				<table>
@@ -143,7 +150,7 @@ export default class extends React.PureComponent {
 						<MeanControl
 							controls={this.props.controls}
 							groupControls={this.props.groupControls}
-							label={`Control ${this.props.groupName}`}
+							label={`Control ${groupName}`}
 							sample="control"
 							handleChange={this.handleChangeGroupControls}
 							color={this.props.colors.control}
@@ -152,7 +159,7 @@ export default class extends React.PureComponent {
 						<SpreadControls
 							controls={this.props.controls}
 							groupControls={this.props.groupControls}
-							label={`Control ${this.props.groupName}`}
+							label={`Control ${groupName}`}
 							sample="control"
 							handleChange={this.handleChangeGroupControls}
 							color={this.props.colors.control}
@@ -161,7 +168,7 @@ export default class extends React.PureComponent {
 						<MeanControl
 							controls={this.props.controls}
 							groupControls={this.props.groupControls}
-							label={`Treated ${this.props.groupName}`}
+							label={`Treated ${groupName}`}
 							sample="treated"
 							handleChange={this.handleChangeGroupControls}
 							color={this.props.colors.treated}
@@ -170,7 +177,7 @@ export default class extends React.PureComponent {
 						<SpreadControls
 							controls={this.props.controls}
 							groupControls={this.props.groupControls}
-							label={`Treated ${this.props.groupName}`}
+							label={`Treated ${groupName}`}
 							sample="treated"
 							handleChange={this.handleChangeGroupControls}
 							color={this.props.colors.treated}
