@@ -6,7 +6,6 @@ import {
 	d3FillWithPattern,
 	d3Wrap,
 	d3Animate,
-	generateData
 } from "../utilities";
 import * as constants from "../constants";
 
@@ -29,7 +28,7 @@ const style = `
 `;
 
 class LargeChart {
-	constructor(element, { samples, patternIds }) {
+	constructor(element, { data, minX, maxX, patternIds }) {
 		this.x = d3.scaleLinear();
 		this.y = d3.scaleLinear();
 		this.line = d3
@@ -52,46 +51,40 @@ class LargeChart {
 			.attr("class", "axis");
 		const defs = this.root.append("defs");
 		const clipIds = {
-			a: _.uniqueId(),
-			b: _.uniqueId(),
+			treated: _.uniqueId(),
+			control: _.uniqueId(),
 			intersect: _.uniqueId()
 		};
 		this.pathA = defs
 			.append("clipPath")
-			.attr("id", clipIds.a)
+			.attr("id", clipIds.treated)
 			.append("path");
 		this.pathB = defs
 			.append("clipPath")
-			.attr("id", clipIds.b)
+			.attr("id", clipIds.control)
 			.append("path");
 		defs.append("clipPath");
-		d3FillWithPattern(this.root, [clipIds.a], patternIds.a, WIDTH, HEIGHT);
-		d3FillWithPattern(this.root, [clipIds.b], patternIds.b, WIDTH, HEIGHT);
+		d3FillWithPattern(this.root, [clipIds.treated], patternIds.treated, WIDTH, HEIGHT);
+		d3FillWithPattern(this.root, [clipIds.control], patternIds.control, WIDTH, HEIGHT);
 		d3FillWithPattern(
 			this.root,
-			[clipIds.a, clipIds.b],
+			[clipIds.treated, clipIds.control],
 			patternIds.intersect,
 			WIDTH,
 			HEIGHT
 		);
-		this.update({ samples }, false);
+		this.update({ data, minX, maxX }, false);
 	}
-	update = ({ samples }, animate = true) => {
-		const data = {
-			a: generateData(samples.a.mean, samples.a.sd),
-			b: generateData(samples.b.mean, samples.b.sd)
-		};
-		const minX = Math.min(d3.min(data.a, d => d.x), d3.min(data.b, d => d.x));
-		const maxX = Math.max(d3.max(data.a, d => d.x), d3.max(data.b, d => d.x));
-		const maxY = Math.max(d3.max(data.a, d => d.y), d3.max(data.b, d => d.y));
+	update = ({ data, minX, maxX }, animate = true) => {
+		const maxY = Math.max(d3.max(data.treated, d => d.y), d3.max(data.control, d => d.y));
 		this.x.domain([minX, maxX]).range([0, WIDTH]);
 		this.y.domain([0, maxY]).range([HEIGHT, 0]);
-		d3Animate(this.pathA, animate).attr("d", this.line(data.a));
-		d3Animate(this.pathB, animate).attr("d", this.line(data.b));
+		d3Animate(this.pathA, animate).attr("d", this.line(data.treated));
+		d3Animate(this.pathB, animate).attr("d", this.line(data.control));
 		d3Animate(this.axisX, animate).call(
 			d3.axisBottom(this.x).ticks(3)
 			//.tickSize(TICK_SIZE)
-			//	.tickPadding(TICK_PADDING)
+			//.tickPadding(TICK_PADDING)
 		);
 	};
 }

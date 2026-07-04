@@ -11,9 +11,16 @@ export const HATCH = false;
 
 export const COLOR_SCHEMES = {
 	"Red & Blue": {
-		a: "#82ace5",
-		b: "#af3742",
-		intersect: "#9666b8",
+		a: {
+			control: "#A4DBE3",
+			treated: "#2F79B2",
+			intersect: "#173C58",
+		},
+		b: {
+			control: "#F1CBC8",
+			treated: "#BE4F66",
+			intersect: "#5F2733",
+		},
 	},
 	"Pink & Blue": {
 		a: "#94c9fd",

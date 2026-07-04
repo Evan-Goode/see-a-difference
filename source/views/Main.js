@@ -42,7 +42,7 @@ export default props => {
 				<div>
 					<Header>
 						<H1>SexDifference.org</H1>
-						<H2>An interactive tool for visualizing sex-related variability</H2>
+						<H2>Interactive tools for visualizing sex-related variability</H2>
 					</Header>
 					<Spacer />
 					<p>

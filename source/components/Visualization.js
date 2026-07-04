@@ -2,25 +2,35 @@ import React from "react";
 import styled from "styled-components";
 import _ from "lodash";
 import toast from "react-hot-toast";
+import * as d3 from "d3";
 
-import {Row, Column, Flexed, Spacer} from "../components/common";
-import Controls from "../components/Controls";
+import { Row, Column, Flexed, Spacer } from "../components/common";
+import GroupControls from "../components/GroupControls";
 import ColorControls from "../components/ColorControls";
 import Patterns from "../components/Patterns";
 import LargeChart from "../components/LargeChart";
 import EffectSize from "../components/EffectSize";
 import ExportCsv from "../components/ExportCsv";
-import SmallChart from "../components/SmallChart";
-import Comparator from "../components/Comparator";
 import * as constants from "../constants";
+import { generateData } from "../utilities";
 
 const INITIAL_CONTROLS = {
-	["a-mean"]: 175,
-	["b-mean"]: 162,
-	["a-sd"]: 7.1,
-	["b-sd"]: 6.5,
-	["a-n"]: 100,
-	["b-n"]: 100,
+	a: {
+		["treated-mean"]: 11.3,
+		["control-mean"]: 10.1,
+		["treated-sd"]: 1.91,
+		["control-sd"]: 2.06,
+		["treated-n"]: 100,
+		["control-n"]: 100,
+	},
+	b: {
+		["treated-mean"]: 10.75,
+		["control-mean"]: 9.8,
+		["treated-sd"]: 2,
+		["control-sd"]: 2.25,
+		["treated-n"]: 100,
+		["control-n"]: 100,
+	},
 	["use-se"]: false,
 };
 
@@ -40,22 +50,44 @@ const parseSd = (sd, se, n, useSe) => {
 const processControls = (controls) => {
 	return {
 		a: {
-			mean: parseFloatFallback(controls["a-mean"], 0),
-			sd: parseSd(
-				controls["a-sd"],
-				controls["a-se"],
-				controls["a-n"],
-				controls["use-se"]
-			),
+			treated: {
+				mean: parseFloatFallback(controls.a["treated-mean"], 0),
+				sd: parseSd(
+					controls.a["treated-sd"],
+					controls.a["treated-se"],
+					controls.a["treated-n"],
+					controls["use-se"]
+				),
+			},
+			control: {
+				mean: parseFloatFallback(controls.a["control-mean"], 0),
+				sd: parseSd(
+					controls.a["control-sd"],
+					controls.a["control-se"],
+					controls.a["control-n"],
+					controls["use-se"]
+				),
+			},
 		},
 		b: {
-			mean: parseFloatFallback(controls["b-mean"], 0),
-			sd: parseSd(
-				controls["b-sd"],
-				controls["b-se"],
-				controls["b-n"],
-				controls["use-se"]
-			),
+			treated: {
+				mean: parseFloatFallback(controls.b["treated-mean"], 0),
+				sd: parseSd(
+					controls.b["treated-sd"],
+					controls.b["treated-se"],
+					controls.b["treated-n"],
+					controls["use-se"]
+				),
+			},
+			control: {
+				mean: parseFloatFallback(controls.b["control-mean"], 0),
+				sd: parseSd(
+					controls.b["control-sd"],
+					controls.b["control-se"],
+					controls.b["control-n"],
+					controls["use-se"]
+				),
+			},
 		},
 	};
 };
@@ -69,8 +101,10 @@ const validateControls = (processed) => {
 		);
 	};
 	return (
-		validate(processed.a.mean, processed.a.sd) &&
-		validate(processed.b.mean, processed.b.sd)
+		validate(processed.a.treated.mean, processed.a.treated.sd) &&
+		validate(processed.a.control.mean, processed.a.control.sd) &&
+		validate(processed.b.treated.mean, processed.b.control.sd) &&
+		validate(processed.b.control.mean, processed.b.control.sd)
 	);
 };
 
@@ -79,37 +113,65 @@ export default class Visualization extends React.PureComponent {
 		super(props);
 		this.state = {
 			controls: {
-				["a-mean"]: INITIAL_CONTROLS["a-mean"].toString(),
-				["b-mean"]: INITIAL_CONTROLS["b-mean"].toString(),
-				["a-sd"]: INITIAL_CONTROLS["a-sd"].toString(),
-				["b-sd"]: INITIAL_CONTROLS["b-sd"].toString(),
-				["a-se"]: (
-					INITIAL_CONTROLS["a-sd"] /
-					Math.sqrt(INITIAL_CONTROLS["a-n"])
-				).toString(),
-				["b-se"]: (
-					INITIAL_CONTROLS["b-sd"] /
-					Math.sqrt(INITIAL_CONTROLS["b-n"])
-				).toString(),
-				["a-n"]: INITIAL_CONTROLS["a-n"],
-				["b-n"]: INITIAL_CONTROLS["b-n"],
+				a: {
+					["treated-mean"]: INITIAL_CONTROLS.a["treated-mean"].toString(),
+					["control-mean"]: INITIAL_CONTROLS.a["control-mean"].toString(),
+					["treated-sd"]: INITIAL_CONTROLS.a["treated-sd"].toString(),
+					["control-sd"]: INITIAL_CONTROLS.a["control-sd"].toString(),
+					["treated-se"]: (
+						INITIAL_CONTROLS.a["treated-sd"] /
+						Math.sqrt(INITIAL_CONTROLS.a["treated-n"])
+					).toString(),
+					["control-se"]: (
+						INITIAL_CONTROLS.a["control-sd"] /
+						Math.sqrt(INITIAL_CONTROLS.a["control-n"])
+					).toString(),
+					["treated-n"]: INITIAL_CONTROLS.a["treated-n"],
+					["control-n"]: INITIAL_CONTROLS.a["control-n"],
+				},
+				b: {
+					["treated-mean"]: INITIAL_CONTROLS.b["treated-mean"].toString(),
+					["control-mean"]: INITIAL_CONTROLS.b["control-mean"].toString(),
+					["treated-sd"]: INITIAL_CONTROLS.b["treated-sd"].toString(),
+					["control-sd"]: INITIAL_CONTROLS.b["control-sd"].toString(),
+					["treated-se"]: (
+						INITIAL_CONTROLS.b["treated-sd"] /
+						Math.sqrt(INITIAL_CONTROLS.b["treated-n"])
+					).toString(),
+					["control-se"]: (
+						INITIAL_CONTROLS.b["control-sd"] /
+						Math.sqrt(INITIAL_CONTROLS.b["control-n"])
+					).toString(),
+					["treated-n"]: INITIAL_CONTROLS.b["treated-n"],
+					["control-n"]: INITIAL_CONTROLS.b["control-n"],
+				},
 				["use-se"]: INITIAL_CONTROLS["use-se"],
 			},
 			colors: constants.COLORS,
 		};
 		this.patternIds = {
-			a: _.uniqueId(),
-			b: _.uniqueId(),
-			intersect: _.uniqueId(),
+			a: {
+				treated: _.uniqueId(),
+				control: _.uniqueId(),
+				intersect: _.uniqueId(),
+			},
+			b: {
+				treated: _.uniqueId(),
+				control: _.uniqueId(),
+				intersect: _.uniqueId(),
+			},
 		};
 		this.toastId = null;
 		this.lastInvalid = null;
 	}
+	setGroupControls = (group, controls) => {
+		this.setState({ controls: Object.assign({}, this.state.controls, { [group]: controls }) });
+	};
 	setControls = (controls) => {
-		this.setState({controls});
+		this.setState({ controls: Object.assign({}, this.state.controls, controls) });
 	};
 	setColors = (colors) => {
-		this.setState({colors});
+		this.setState({ colors });
 	};
 	componentDidMount() {
 		this.maybeNotify();
@@ -134,14 +196,24 @@ export default class Visualization extends React.PureComponent {
 	}
 	render() {
 		const controls = processControls(this.state.controls);
-		const smallPatternIdsA = {
-			sample: this.patternIds.a,
-			intersect: this.patternIds.intersect,
+		const data = {
+			a: {
+				treated: generateData(controls.a.treated.mean, controls.a.treated.sd),
+				control: generateData(controls.a.control.mean, controls.a.control.sd),
+			},
+			b: {
+				treated: generateData(controls.b.treated.mean, controls.b.treated.sd),
+				control: generateData(controls.b.control.mean, controls.b.control.sd),
+			},
 		};
-		const smallPatternIdsB = {
-			sample: this.patternIds.b,
-			intersect: this.patternIds.intersect,
-		};
+		const minX = Math.min(
+			d3.min(data.a.treated, d => d.x), d3.min(data.a.control, d => d.x),
+			d3.min(data.b.treated, d => d.x), d3.min(data.b.control, d => d.x),
+		);
+		const maxX = Math.max(
+			d3.max(data.a.treated, d => d.x), d3.max(data.a.control, d => d.x),
+			d3.max(data.b.treated, d => d.x), d3.max(data.b.control, d => d.x),
+		);
 		return (
 			<>
 				<Patterns
@@ -149,50 +221,50 @@ export default class Visualization extends React.PureComponent {
 					patternIds={this.patternIds}
 				/>
 				<Row>
-					<Controls
+					<GroupControls
 						controls={this.state.controls}
+						groupControls={this.state.controls.b}
+						group={"b"}
+						groupName={"Female"}
 						setControls={this.setControls}
-						colors={this.state.colors}
+						setGroupControls={this.setGroupControls}
+						colors={this.state.colors.b}
 					/>
 					<Flexed>
 						<LargeChart
-							samples={controls}
-							patternIds={this.patternIds}
+							data={data.b}
+							minX={minX}
+							maxX={maxX}
+							patternIds={this.patternIds.b}
 						/>
 					</Flexed>
 					<div>
-						<EffectSize samples={controls} />
-						<ExportCsv samples={controls} />
+						<EffectSize samples={controls.b} />
+						{/*<ExportCsv samples={controls.b} />*/}
 					</div>
 				</Row>
-				<Spacer />
-				<Row spacing="4rem">
-					<Column>
-						<p>Male</p>
-						<SmallChart
-							sample={controls.a}
-							other={controls.b}
-							patternIds={smallPatternIdsA}
+				<Row>
+					<GroupControls
+						controls={this.state.controls}
+						groupControls={this.state.controls.a}
+						group={"a"}
+						groupName={"Male"}
+						setControls={this.setControls}
+						setGroupControls={this.setGroupControls}
+						colors={this.state.colors.a}
+					/>
+					<Flexed>
+						<LargeChart
+							data={data.a}
+							minX={minX}
+							maxX={maxX}
+							patternIds={this.patternIds.a}
 						/>
-						<Comparator
-							sample={controls.a}
-							other={controls.b}
-							labels={{sample: "male", other: "female"}}
-						/>
-					</Column>
-					<Column>
-						<p>Female</p>
-						<SmallChart
-							sample={controls.b}
-							other={controls.a}
-							patternIds={smallPatternIdsB}
-						/>
-						<Comparator
-							sample={controls.b}
-							other={controls.a}
-							labels={{sample: "female", other: "male"}}
-						/>
-					</Column>
+					</Flexed>
+					<div>
+						<EffectSize samples={controls.a} />
+						{/*<ExportCsv samples={controls.a} />*/}
+					</div>
 				</Row>
 				<Spacer />
 				<Row>

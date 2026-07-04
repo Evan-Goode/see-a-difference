@@ -45,5 +45,9 @@ export const Check = styled.input.attrs({ type: "checkbox" })`
 	vertical-align: middle;
 `;
 export const Link = styled.a`
-	color: ${darken(0.2, constants.COLORS.a)};
+	color: ${darken(0.2, constants.COLORS.a.treated)};
+`;
+
+export const Label = styled.label`
+	color: ${(props) => props.color};
 `;

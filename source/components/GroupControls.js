@@ -2,7 +2,7 @@ import React from "react";
 import _ from "lodash";
 import styled from "styled-components";
 
-import { Input, Check } from "./common";
+import { Input, Check, Label } from "./common";
 
 const FieldSet = styled.fieldset`
 	border: none;
@@ -27,13 +27,13 @@ const MeanControl = props => {
 	return (
 		<Tr>
 			<Td>
-				<label htmlFor={meanId}>{props.label} Mean</label>
+				<Label htmlFor={meanId} color={props.labelColor}>{props.label} Mean</Label>
 			</Td>
 			<Td>
 				<Input
 					id={meanId}
 					name={meanName}
-					value={props.controls[meanName]}
+					value={props.groupControls[meanName]}
 					onChange={props.handleChange}
 					color={props.color}
 				/>
@@ -52,13 +52,13 @@ const SpreadControls = props => {
 			<>
 				<Tr>
 					<Td>
-						<label htmlFor={seId}>{props.label} SEM</label>
+						<Label htmlFor={seId} color={props.labelColor}>{props.label} SEM</Label>
 					</Td>
 					<Td>
 						<Input
 							id={seId}
 							name={seName}
-							value={props.controls[seName]}
+							value={props.groupControls[seName]}
 							onChange={props.handleChange}
 							color={props.color}
 						/>
@@ -66,15 +66,15 @@ const SpreadControls = props => {
 				</Tr>
 				<Tr>
 					<Td>
-						<label htmlFor={nId}>
+						<Label htmlFor={nId} color={props.labelColor}>
 							{props.label} <em>n</em>
-						</label>
+						</Label>
 					</Td>
 					<Td>
 						<Input
 							id={nId}
 							name={nName}
-							value={props.controls[nName]}
+							value={props.groupControls[nName]}
 							onChange={props.handleChange}
 							color={props.color}
 						/>
@@ -88,14 +88,14 @@ const SpreadControls = props => {
 	return (
 		<Tr>
 			<Td>
-				<label htmlFor={sdId}>{props.label} SD</label>
+				<Label htmlFor={sdId} color={props.labelColor}>{props.label} SD</Label>
 			</Td>
 			<Td>
 				<Input
 					id={sdId}
 					name={sdName}
-					value={props.controls[sdName]}
-					onChange={props.handleChange}
+					value={props.groupControls[sdName]}
+					onChange={props.handleUseSeChange}
 					color={props.color}
 				/>
 			</Td>
@@ -109,7 +109,7 @@ const UseSeControl = props => {
 	return (
 		<Tr>
 			<Td>
-				<label htmlFor={useSeId}>Use Standard Error</label>
+				<Label htmlFor={useSeId} color={props.labelColor}>Use Standard Error</Label>
 			</Td>
 			<Td>
 				<Check
@@ -124,9 +124,10 @@ const UseSeControl = props => {
 };
 
 export default class extends React.PureComponent {
-	handleChange = event => {
-		this.props.setControls(
-			Object.assign({}, this.props.controls, {
+	handleChangeControls = event => this.props.setControls({"use-se": event.target.checked});
+	handleChangeGroupControls = event => {
+		this.props.setGroupControls(this.props.group,
+			Object.assign({}, this.props.groupControls, {
 				[event.target.name]:
 					event.target.type === "checkbox"
 						? event.target.checked
@@ -141,35 +142,43 @@ export default class extends React.PureComponent {
 					<tbody>
 						<MeanControl
 							controls={this.props.controls}
-							label="Male"
-							sample="a"
-							handleChange={this.handleChange}
-							color={this.props.colors.a}
+							groupControls={this.props.groupControls}
+							label={`Control ${this.props.groupName}`}
+							sample="control"
+							handleChange={this.handleChangeGroupControls}
+							color={this.props.colors.control}
+							labelColor={this.props.colors.intersect}
 						/>
 						<SpreadControls
 							controls={this.props.controls}
-							label="Male"
-							sample="a"
-							handleChange={this.handleChange}
-							color={this.props.colors.a}
+							groupControls={this.props.groupControls}
+							label={`Control ${this.props.groupName}`}
+							sample="control"
+							handleChange={this.handleChangeGroupControls}
+							color={this.props.colors.control}
+							labelColor={this.props.colors.intersect}
 						/>
 						<MeanControl
 							controls={this.props.controls}
-							label="Female"
-							sample="b"
-							handleChange={this.handleChange}
-							color={this.props.colors.b}
+							groupControls={this.props.groupControls}
+							label={`Treated ${this.props.groupName}`}
+							sample="treated"
+							handleChange={this.handleChangeGroupControls}
+							color={this.props.colors.treated}
+							labelColor={this.props.colors.intersect}
 						/>
 						<SpreadControls
 							controls={this.props.controls}
-							label="Female"
-							sample="b"
-							handleChange={this.handleChange}
-							color={this.props.colors.b}
+							groupControls={this.props.groupControls}
+							label={`Treated ${this.props.groupName}`}
+							sample="treated"
+							handleChange={this.handleChangeGroupControls}
+							color={this.props.colors.treated}
+							labelColor={this.props.colors.intersect}
 						/>
 						<UseSeControl
 							controls={this.props.controls}
-							handleChange={this.handleChange}
+							handleChange={this.handleChangeControls}
 						/>
 					</tbody>
 				</table>
