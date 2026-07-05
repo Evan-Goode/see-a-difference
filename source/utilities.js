@@ -37,7 +37,7 @@ export const d3Wrap = (wrapped, style = "") => {
 			this.chart && this.chart.update(next);
 		}
 		render() {
-			return <Styled ref={this.element} />;
+			return <Styled className={this.props.className} ref={this.element} />;
 		}
 	};
 };

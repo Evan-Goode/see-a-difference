@@ -51,3 +51,20 @@ export const Link = styled.a`
 export const Label = styled.label`
 	color: ${(props) => props.color};
 `;
+
+export const Table = styled.table`
+	border-collapse: collapse;
+	margin: 1em 0;
+	th, td {
+		padding: 0.4em 0.8em;
+		border: 1px solid #ccc;
+		text-align: right;
+	}
+	th:first-child, td:first-child {
+		text-align: left;
+	}
+	tbody tr:last-child {
+		font-weight: bold;
+		background: #f4f4f4;
+	}
+`;

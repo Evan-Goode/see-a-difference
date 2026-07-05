@@ -33,14 +33,14 @@ export default props => {
 		minimum,
 		maximum
 	);
-	const percentage = `${Math.round(100 * overlap)}%`;
+	const percentage = Math.round(100 * overlap);
 	return (
 		<div>
 			<p>
-				<em>d</em> = {cohen.toFixed(constants.DECIMAL_PRECISION)} (
+				<math><mi>d</mi><mo>=</mo><mn>{cohen.toFixed(constants.DECIMAL_PRECISION)}</mn></math> (
 				{describeCohen(cohen)})
 			</p>
-			<p>overlap = {percentage}</p>
+			<p><math><mtext>overlap</mtext><mo>=</mo><mn>{percentage}</mn><mo>%</mo></math></p>
 		</div>
 	);
 };

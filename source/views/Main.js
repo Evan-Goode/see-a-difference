@@ -13,6 +13,12 @@ const StyleWrapper = styled.div`
 	color: ${color};
 	line-height: 1.4;
 	font-size: 1.2em;
+	h1 {
+		margin: 0;
+	}
+	h2 {
+		margin: 0;
+	}
 `;
 const Container = styled.div`
 	margin: 3em auto;
@@ -44,7 +50,6 @@ export default props => {
 						<H1>SexDifference.org</H1>
 						<H2>Interactive tools for visualizing sex-related variability</H2>
 					</Header>
-					<Spacer />
 					<p>
 						This tool allows you to see the effect size (<em>d</em>) and percent
 						overlap for any comparison between males and females. Enter the mean
@@ -52,18 +57,11 @@ export default props => {
 						standard error instead of the standard deviation, check the box to
 						enter it and the sample size (<em>n</em>).
 					</p>
-					<Spacer />
 				</div>
 				<Visualization />
-				<Spacer />
 				<FinePrint>
-					This tool assumes both distributions are normal. Effect size is based
-					on Cohen’s d. Overlap is based on Weitzman’s ∆. The source code is
-					available at{" "}
-					<Link href="https://github.com/evan-goode/see-a-difference">
-						GitHub
-					</Link>{" "}
-					under AGPLv3. If you use this tool to prepare a publication, please
+					This tool assumes all distributions are normal. Effect size is based
+					on Cohen’s d. Overlap is based on Weitzman’s ∆. The <Link href="https://github.com/evan-goode/see-a-difference">source code</Link> is available under AGPLv3. If you use this tool to prepare a publication, please
 					cite: Maney DL. 2016 Perils and pitfalls of reporting sex differences.
 					Phil. Trans. R. Soc. B 371: 20150119.{" "}
 					<Link href="https://dx.doi.org/10.1098/rstb.2015.0119">

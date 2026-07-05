@@ -298,7 +298,6 @@ export default class Visualization extends React.PureComponent {
 					<ExportCsv data={data} />
 				</Row>
 				<Analysis controls={controls} />
-				<Spacer />
 				<Row>
 					<ColorControls
 						colors={this.state.colors}

@@ -87,7 +87,7 @@ const SpreadControls = props => {
 			<Tr>
 				<Td>
 					<Label htmlFor={nId} color={props.labelColor}>
-						{props.label} <em>n</em>
+						{props.label} <math><mi>n</mi></math>
 					</Label>
 				</Td>
 				<Td>
@@ -144,7 +144,7 @@ export default class extends React.PureComponent {
 	render() {
 		const groupName = constants.GROUP_NAMES[this.props.group];
 		return (
-			<FieldSet>
+			<FieldSet className={this.props.className}>
 				<table>
 					<tbody>
 						<MeanControl

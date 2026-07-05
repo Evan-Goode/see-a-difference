@@ -1,8 +1,8 @@
 import _ from "lodash";
 import React, { useId, useState } from "react";
-import styled from "styled-components";
 
 import * as constants from "../constants";
+import { Row, Table } from "../components/common";
 
 // Lanczos approximation of ln(Γ(x)).
 const lgamma = x => {
@@ -130,32 +130,15 @@ const computeAnova = controls => {
 	};
 
 	return {
-		terms: [
-			term(`Sex (${constants.GROUP_NAMES.a} vs. ${constants.GROUP_NAMES.b})`, ssA),
-			term("Treatment (control vs. treated)", ssB),
-			term("Sex × Treatment", ssAB),
-		],
+		terms: {
+			ssA: term(`Sex (${constants.GROUP_NAMES.a} vs. ${constants.GROUP_NAMES.b})`, ssA),
+			ssB: term("Treatment (control vs. treated)", ssB),
+			ssAB: term("Sex × Treatment", ssAB),
+		},
 		error: { name: "Error", ss: ssErr, df: dfError, ms: mse, f: null, p: null },
 		total: { name: "Total (corrected)", ss: total, df: N - 1, ms: null, f: null, p: null },
 	};
 };
-
-const Table = styled.table`
-	border-collapse: collapse;
-	margin-top: 1em;
-	th, td {
-		padding: 0.4em 0.8em;
-		border: 1px solid #ccc;
-		text-align: right;
-	}
-	th:first-child, td:first-child {
-		text-align: left;
-	}
-	tbody tr:last-child {
-		font-weight: bold;
-		background: #f4f4f4;
-	}
-`;
 
 const formatP = p => {
 	if (p == null) return "";
@@ -176,7 +159,7 @@ const AnovaTable = ({ result }) => (
 			</tr>
 		</thead>
 		<tbody>
-			{result.terms.map(t => (
+			{Object.values(result.terms).map(t => (
 				<tr key={t.name}>
 					<td>{t.name}</td>
 					<td>{t.ss.toFixed(constants.DECIMAL_PRECISION)}</td>
@@ -207,13 +190,24 @@ const AnovaTable = ({ result }) => (
 );
 
 const Anova = ({ controls }) => {
-	let result;
-	try {
-		result = computeAnova(controls);
-	} catch (error) {
-		return <p>Could not compute the ANOVA: {error.message}.</p>;
-	}
-	return <AnovaTable result={result} />;
+	const result = computeAnova(controls);
+
+	const alpha = 0.05;
+
+	const alphaMessage = <math><mi>α</mi><mo>=</mo><mn>{alpha}</mn></math>;
+
+	return (
+		<>
+			{result.terms.ssAB.p < alpha ? (
+				<p>Using {alphaMessage}, the sex-by-treatment effect is <strong>statistically significant</strong>. The result suggests that the effect of treatment depended on sex. The result suggests that the females and males responded differently to the treatment. A sex-dependent effect was detected in this dataset.</p>
+			) : (
+				<p>Using {alphaMessage}, the sex-by-treatment effect is <strong>not statistically significant</strong>. This result does <strong>not</strong> suggest that the effect of treatment depended on sex. The result does <strong>not</strong> suggest that the females and males responded differently to the treatment. A sex-dependent effect could not be detected in this dataset. Proceeding to post-hoc within-sex tests is not recommended.</p>
+			)}
+			<Row>
+				<AnovaTable result={result} />
+			</Row>
+		</>
+	);
 };
 
 export default props => {
