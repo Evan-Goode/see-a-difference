@@ -8,16 +8,20 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-hot-toast": "^2.6.0",
+    "react-router": "^8.1.0",
     "styled-components": "^6.4.3",
     "styled-reset": "^5.0.0"
   },
   "scripts": {
     "start": "npx parcel source/index.html --cache-dir build/cache/ --dist-dir build/",
-    "build": "npx parcel build source/index.html --cache-dir build/cache/ --dist-dir build/",
+    "build": "npx parcel build source/index.html --cache-dir build/cache/ --dist-dir dist/",
     "clean": "rm -rf build/*"
   },
   "devDependencies": {
     "@parcel/packager-raw-url": "2.16.4",
     "@parcel/transformer-webmanifest": "2.16.4"
+  },
+  "@parcel/resolver-default": {
+    "packageExports": true
   }
 }

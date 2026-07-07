@@ -7,10 +7,9 @@ import {
 	d3Wrap,
 	d3Animate,
 } from "../utilities";
-import * as constants from "../constants";
 
 const WIDTH = 320;
-const HEIGHT = 160;
+const HEIGHT = 180;
 const MARGIN = {
 	top: 0,
 	right: 0,
@@ -51,24 +50,24 @@ class LargeChart {
 			.attr("class", "axis");
 		const defs = this.root.append("defs");
 		const clipIds = {
-			treated: _.uniqueId(),
-			control: _.uniqueId(),
+			a: _.uniqueId(),
+			b: _.uniqueId(),
 			intersect: _.uniqueId()
 		};
 		this.pathA = defs
 			.append("clipPath")
-			.attr("id", clipIds.treated)
+			.attr("id", clipIds.a)
 			.append("path");
 		this.pathB = defs
 			.append("clipPath")
-			.attr("id", clipIds.control)
+			.attr("id", clipIds.b)
 			.append("path");
 		defs.append("clipPath");
-		d3FillWithPattern(this.root, [clipIds.treated], patternIds.treated, WIDTH, HEIGHT);
-		d3FillWithPattern(this.root, [clipIds.control], patternIds.control, WIDTH, HEIGHT);
+		d3FillWithPattern(this.root, [clipIds.a], patternIds.a, WIDTH, HEIGHT);
+		d3FillWithPattern(this.root, [clipIds.b], patternIds.b, WIDTH, HEIGHT);
 		d3FillWithPattern(
 			this.root,
-			[clipIds.treated, clipIds.control],
+			[clipIds.a, clipIds.b],
 			patternIds.intersect,
 			WIDTH,
 			HEIGHT
@@ -76,15 +75,13 @@ class LargeChart {
 		this.update({ data, minX, maxX }, false);
 	}
 	update = ({ data, minX, maxX }, animate = true) => {
-		const maxY = Math.max(d3.max(data.treated, d => d.y), d3.max(data.control, d => d.y));
+		const maxY = Math.max(d3.max(data.a, d => d.y), d3.max(data.b, d => d.y));
 		this.x.domain([minX, maxX]).range([0, WIDTH]);
 		this.y.domain([0, maxY]).range([HEIGHT, 0]);
-		d3Animate(this.pathA, animate).attr("d", this.line(data.treated));
-		d3Animate(this.pathB, animate).attr("d", this.line(data.control));
+		d3Animate(this.pathA, animate).attr("d", this.line(data.a));
+		d3Animate(this.pathB, animate).attr("d", this.line(data.b));
 		d3Animate(this.axisX, animate).call(
 			d3.axisBottom(this.x).ticks(3)
-			//.tickSize(TICK_SIZE)
-			//.tickPadding(TICK_PADDING)
 		);
 	};
 }

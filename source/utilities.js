@@ -66,3 +66,23 @@ export const riemann = (f, start, end) => {
 	const delta = (end - start) / constants.SAMPLE_COUNT;
 	return _.sum(_.range(start, end, delta).map(x => f(x) * delta));
 };
+
+export const parseFloatFallback = (value, fallback, positive = false) => {
+	const parsed = parseFloat(value);
+	return isNaN(parsed) || (positive && parsed <= 0) ? fallback : parsed;
+};
+
+export const parseIntFallback = (value, fallback, positive = false) => {
+	const parsed = parseInt(value);
+	return isNaN(parsed) || (positive && parsed <= 0) ? fallback : parsed;
+};
+
+export const parseSd = (sd, se, n, useSe) => {
+	if (useSe) {
+		return (
+			parseFloatFallback(se, 1, true) *
+			Math.sqrt(parseFloatFallback(n, 1, true))
+		);
+	}
+	return parseFloatFallback(sd, 1, true);
+};

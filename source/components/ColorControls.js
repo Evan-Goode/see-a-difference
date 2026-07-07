@@ -1,43 +1,8 @@
-import React, {useEffect, useId} from "react";
+import React, {useEffect} from "react";
 import _ from "lodash";
-import styled from "styled-components";
 
-import {Input} from "./common";
+import ColorControl, { Tr, Td } from "./ColorControl";
 import * as constants from "../constants";
-
-const Tr = styled.tr`
-	> td:first-child {
-		text-align: right;
-	}
-	> td:last-child {
-		text-align: left;
-	}
-`;
-
-const Td = styled.td`
-	padding: 0.5em;
-`;
-
-const ColorControl = (props) => {
-	const id = useId();
-	return (
-		<Tr>
-			<Td>
-				<label htmlFor={id}>{props.label}</label>
-			</Td>
-			<Td>
-				<Input
-					id={id}
-					name={props.name}
-					value={props.value}
-					onChange={props.handleChange}
-					color={props.value}
-					width="5em"
-				/>
-			</Td>
-		</Tr>
-	);
-};
 
 export default class extends React.PureComponent {
 	constructor(props) {
@@ -46,17 +11,20 @@ export default class extends React.PureComponent {
 		this.selectId = _.uniqueId();
 	}
 	handleChange = (event) => {
+		const [group, role] = event.target.name.split(".");
 		this.props.setColors(
 			Object.assign({}, this.props.colors, {
-				[event.target.name]: event.target.value,
+				[group]: Object.assign({}, this.props.colors[group], {
+					[role]: event.target.value,
+				}),
 			})
 		);
 	};
 	setScheme = (event) => {
-		if (event.target.value in constants.COLOR_SCHEMES) {
+		if (event.target.value in this.props.schemes) {
 			this.props.setColors(
-				constants.COLOR_SCHEMES[event.target.value]
-			)
+				this.props.schemes[event.target.value]
+			);
 		}
 		this.setState({showCustom: event.target.value == "custom"});
 	};
@@ -69,8 +37,8 @@ export default class extends React.PureComponent {
 							<label htmlFor={this.selectId}>Color Scheme</label>
 						</Td>
 						<Td>
-							<select id={this.selectId} name={this.selectId} onChange={this.setScheme} defaultValue={constants.DEFAULT_COLOR_SCHEME}>
-								{Object.keys(constants.COLOR_SCHEMES).map(name => (
+							<select id={this.selectId} name={this.selectId} onChange={this.setScheme} defaultValue={this.props.defaultScheme}>
+								{Object.keys(this.props.schemes).map(name => (
 									<option value={name} key={name}>{name}</option>
 								))}
 								<option value="custom" key="custom">Custom colors...</option>
@@ -79,24 +47,44 @@ export default class extends React.PureComponent {
 					</Tr>
 					{this.state.showCustom && <>
 					<ColorControl
-						label="Sample 1 Color"
-						name="a"
-						value={this.props.colors.a}
+						label="Male Control Color"
+						name="a.control"
+						value={this.props.colors.a.control}
 						handleChange={this.handleChange}
 					/>
 					<ColorControl
-						label="Sample 2 Color"
-						name="b"
-						value={this.props.colors.b}
+						label="Male Treated Color"
+						name="a.treated"
+						value={this.props.colors.a.treated}
+						handleChange={this.handleChange}
+					/>
+					<ColorControl
+						label="Female Control Color"
+						name="b.control"
+						value={this.props.colors.b.control}
+						handleChange={this.handleChange}
+					/>
+					<ColorControl
+						label="Female Treated Color"
+						name="b.treated"
+						value={this.props.colors.b.treated}
 						handleChange={this.handleChange}
 					/>
 					{constants.HATCH || (
+						<>
 						<ColorControl
-							label="Overlap Color"
-							name="intersect"
-							value={this.props.colors.intersect}
+							label="Male Overlap Color"
+							name="a.intersect"
+							value={this.props.colors.a.intersect}
 							handleChange={this.handleChange}
 						/>
+						<ColorControl
+							label="Female Overlap Color"
+							name="b.intersect"
+							value={this.props.colors.b.intersect}
+							handleChange={this.handleChange}
+						/>
+						</>
 					)}
 					</>}
 				</tbody>

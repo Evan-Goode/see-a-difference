@@ -140,11 +140,10 @@ const computeAnova = controls => {
 	};
 };
 
-const formatP = p => {
-	if (p == null) return "";
-	if (p < 0.0001) return "< 0.0001";
-	return p.toFixed(4);
-};
+const P = props => {
+	if (props.p < 0.0001) return <math><mi>p</mi><mo>&lt;</mo><mn>0.001</mn></math>;
+	return <math><mi>p</mi><mo>=</mo><mn>{props.p.toFixed(3)}</mn></math>;
+}
 
 const AnovaTable = ({ result }) => (
 	<Table>
@@ -166,7 +165,7 @@ const AnovaTable = ({ result }) => (
 					<td>{t.df}</td>
 					<td>{t.ms.toFixed(constants.DECIMAL_PRECISION)}</td>
 					<td>{t.f.toFixed(constants.DECIMAL_PRECISION)}</td>
-					<td>{formatP(t.p)}</td>
+					<td><P p={t.p} /></td>
 				</tr>
 			))}
 			<tr>
@@ -199,40 +198,49 @@ const Anova = ({ controls }) => {
 	return (
 		<>
 			{result.terms.ssAB.p < alpha ? (
-				<p>Using {alphaMessage}, the sex-by-treatment effect is <strong>statistically significant</strong>. The result suggests that the effect of treatment depended on sex. The result suggests that the females and males responded differently to the treatment. A sex-dependent effect was detected in this dataset.</p>
+				<p>Using {alphaMessage}, the sex-by-treatment effect is <strong>statistically significant</strong> (<P p={result.terms.ssAB.p} />). The result suggests that the effect of treatment depended on sex. The result suggests that the females and males responded differently to the treatment. A sex-dependent effect was detected in this dataset.</p>
 			) : (
-				<p>Using {alphaMessage}, the sex-by-treatment effect is <strong>not statistically significant</strong>. This result does <strong>not</strong> suggest that the effect of treatment depended on sex. The result does <strong>not</strong> suggest that the females and males responded differently to the treatment. A sex-dependent effect could not be detected in this dataset. Proceeding to post-hoc within-sex tests is not recommended.</p>
+				<p>Using {alphaMessage}, the sex-by-treatment effect is <strong>not statistically significant</strong> (<P p={result.terms.ssAB.p} />). This result does <strong>not</strong> suggest that the effect of treatment depended on sex. The result does <strong>not</strong> suggest that the females and males responded differently to the treatment. A sex-dependent effect could not be detected in this dataset. Proceeding to post-hoc within-sex tests is not recommended.</p>
 			)}
-			<Row>
-				<AnovaTable result={result} />
-			</Row>
+			<details>
+				<summary>ANOVA details</summary>
+				<Row>
+					<AnovaTable result={result} />
+				</Row>
+			</details>
 		</>
 	);
 };
 
 export default props => {
-	const withinSubjectsId = useId();
-	const betweenSubjectsId = useId();
+	// const withinSubjectsId = useId();
+	// const betweenSubjectsId = useId();
+	//
+	// const [design, setDesign] = useState(null);
 
-	const [design, setDesign] = useState(null);
-
+	// return (
+	// 	<div>
+	// 		<form>
+	// 			<fieldset>
+	// 				<legend>Select an option to continue analysis</legend>
+	// 				<div>
+	// 					<input type="radio" id={withinSubjectsId} name="design" value="within-subjects" checked={design === "within-subjects"} onChange={() => setDesign("within-subjects")} />
+	// 					<label htmlFor={withinSubjectsId}>My treatment effect is within-subjects (e.g. control males and treated males are the same animals or participants before and after a manipulation)</label>
+	// 				</div>
+	// 				<div>
+	// 					<input type="radio" id={betweenSubjectsId} name="design" value="between-subjects" checked={design === "between-subjects"} onChange={() => setDesign("between-subjects")} />
+	// 					<label htmlFor={betweenSubjectsId}>My treatment effect is between subjects (each of the four groups has unique animals or participants)</label>
+	// 				</div>
+	// 			</fieldset>
+	// 		</form>
+	// 		{design === "within-subjects" && (<p>The ANOVA cannot be calculated using this tool; raw data are needed so that each subject's control measure can be matched up with their treated measure.</p>)}
+	// 		{design === "between-subjects" && <Anova controls={props.controls} />}
+	// 	</div>
+	// );
 	return (
 		<div>
-			<form>
-				<fieldset>
-					<legend>Select an option to continue analysis</legend>
-					<div>
-						<input type="radio" id={withinSubjectsId} name="design" value="within-subjects" checked={design === "within-subjects"} onChange={() => setDesign("within-subjects")} />
-						<label htmlFor={withinSubjectsId}>My treatment effect is within-subjects (e.g. control males and treated males are the same animals or participants before and after a manipulation)</label>
-					</div>
-					<div>
-						<input type="radio" id={betweenSubjectsId} name="design" value="between-subjects" checked={design === "between-subjects"} onChange={() => setDesign("between-subjects")} />
-						<label htmlFor={betweenSubjectsId}>My treatment effect is between subjects (each of the four groups has unique animals or participants)</label>
-					</div>
-				</fieldset>
-			</form>
-			{design === "within-subjects" && (<p>The ANOVA cannot be calculated using this tool; raw data are needed so that each subject's control measure can be matched up with their treated measure.</p>)}
-			{design === "between-subjects" && <Anova controls={props.controls} />}
+			<p>This analysis assumes the treatment effect is between-subjects (each of the four groups has unique animals or participants). Results will not be valid for within-subjects designs (e.g. control males and treated males are the same animals or participants before and after a manipulation).</p>
+			<Anova controls={props.controls} />
 		</div>
 	);
 };

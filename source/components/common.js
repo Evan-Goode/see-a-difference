@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import * as constants from "../constants";
-import { transparentize, darken } from "polished";
+import { transparentize, lighten, darken, cssVar } from "polished";
+
+export const color = lighten(1 / 5, "black");
 
 export const Row = styled.div`
 	display: flex;
@@ -12,6 +14,10 @@ export const Row = styled.div`
 	> :not(:last-child) {
 		margin-right: ${(props) => props.spacing};
 	}
+`;
+
+export const FinePrint = styled.p`
+	color: ${lighten(1 / 4, color)};
 `;
 
 export const Column = styled(Row)`
@@ -45,7 +51,7 @@ export const Check = styled.input.attrs({ type: "checkbox" })`
 	vertical-align: middle;
 `;
 export const Link = styled.a`
-	color: ${darken(0.2, constants.COLORS.a.treated)};
+	color: ${darken(0.2, "#2F79B2")};
 `;
 
 export const Label = styled.label`

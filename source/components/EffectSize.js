@@ -12,35 +12,32 @@ const describeCohen = d => {
 };
 
 export default props => {
-	const { treated, control } = props.samples;
+	const { a, b } = props.samples;
 	const cohen = Math.abs(
-		(treated.mean - control.mean) / Math.sqrt((treated.sd * treated.sd + control.sd * control.sd) / 2)
+		(a.mean - b.mean) / Math.sqrt((a.sd * a.sd + b.sd * b.sd) / 2)
 	);
 	const minimum = Math.min(
-		constants.Z_MIN * treated.sd + treated.mean,
-		constants.Z_MIN * control.sd + control.mean
+		constants.Z_MIN * a.sd + a.mean,
+		constants.Z_MIN * b.sd + b.mean
 	);
 	const maximum = Math.max(
-		constants.Z_MAX * treated.sd + treated.mean,
-		constants.Z_MAX * control.sd + control.mean
+		constants.Z_MAX * a.sd + a.mean,
+		constants.Z_MAX * b.sd + b.mean
 	);
 	const distributions = {
-		treated: gaussian(treated.mean, treated.sd * treated.sd),
-		control: gaussian(control.mean, control.sd * control.sd)
+		a: gaussian(a.mean, a.sd * a.sd),
+		b: gaussian(b.mean, b.sd * b.sd)
 	};
 	const overlap = riemann(
-		x => Math.min(distributions.treated.pdf(x), distributions.control.pdf(x)),
+		x => Math.min(distributions.a.pdf(x), distributions.b.pdf(x)),
 		minimum,
 		maximum
 	);
 	const percentage = Math.round(100 * overlap);
 	return (
-		<div>
-			<p>
-				<math><mi>d</mi><mo>=</mo><mn>{cohen.toFixed(constants.DECIMAL_PRECISION)}</mn></math> (
-				{describeCohen(cohen)})
-			</p>
-			<p><math><mtext>overlap</mtext><mo>=</mo><mn>{percentage}</mn><mo>%</mo></math></p>
-		</div>
+		<p>
+			<math><mi>d</mi><mo>=</mo><mn>{cohen.toFixed(constants.DECIMAL_PRECISION)}</mn></math> ({describeCohen(cohen)})<br/>
+			<math><mtext>overlap</mtext><mo>=</mo><mn>{percentage}</mn><mo>%</mo></math>
+		</p>
 	);
 };

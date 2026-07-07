@@ -2,8 +2,8 @@ import React, { useId } from "react";
 import _ from "lodash";
 import styled from "styled-components";
 
-import { Input, Check, Label } from "./common";
-import * as constants from "../constants";
+import { Input, Check, Label } from "../common";
+import * as constants from "../../constants";
 
 const FieldSet = styled.fieldset`
 	border: none;

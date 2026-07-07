@@ -4,16 +4,16 @@ import _ from "lodash";
 import toast from "react-hot-toast";
 import * as d3 from "d3";
 
-import { Row, Column, Flexed, Spacer } from "../components/common";
-import GroupControls from "../components/GroupControls";
+import { Row, Spacer, FinePrint } from "../components/common";
+import GroupControls from "../components/SexDependentEffect/GroupControls";
 import ColorControls from "../components/ColorControls";
 import Patterns from "../components/Patterns";
 import LargeChart from "../components/LargeChart";
-import Analysis from "../components/Analysis";
+import AnovaAnalysis from "../components/AnovaAnalysis";
 import EffectSize from "../components/EffectSize";
 import ExportCsv from "../components/ExportCsv";
 import * as constants from "../constants";
-import { generateData } from "../utilities";
+import { generateData, parseFloatFallback, parseIntFallback, parseSd } from "../utilities";
 
 const ChartGrid = styled.div`
 	display: grid;
@@ -22,10 +22,9 @@ const ChartGrid = styled.div`
 `;
 
 const GroupLabel = styled.header`
-	font-weight: bold;
 	text-align: center;
-	grid-column: 1 / -1;
-	font-size: 2rem;
+	// grid-column: 1 / -1;
+	font-size: 1.5rem;
 	color: ${props => props.color};
 `;
 
@@ -34,11 +33,29 @@ const GroupAnalysis = styled.div`
 	align-self: center;
 `;
 
-const StyledLargeChart = styled(LargeChart)``;
+const ChartContainer = styled.div`
+	align-self: center;
+`;
 
 const StyledGroupControls = styled(GroupControls)`
 	justify-self: end;
 `;
+
+const COLOR_SCHEMES = {
+	"Red & Blue": {
+		a: {
+			control: "#A4DBE3",
+			treated: "#2F79B2",
+			intersect: "#173C58",
+		},
+		b: {
+			control: "#F1CBC8",
+			treated: "#BE4F66",
+			intersect: "#5F2733",
+		},
+	},
+};
+const DEFAULT_COLOR_SCHEME = "Red & Blue";
 
 const INITIAL_CONTROLS = {
 	a: {
@@ -46,39 +63,20 @@ const INITIAL_CONTROLS = {
 		["control-mean"]: 10.1,
 		["treated-sd"]: 1.91,
 		["control-sd"]: 2.06,
-		["treated-n"]: 100,
-		["control-n"]: 100,
+		["treated-n"]: 24,
+		["control-n"]: 24,
 	},
 	b: {
 		["treated-mean"]: 10.75,
 		["control-mean"]: 9.8,
 		["treated-sd"]: 2,
 		["control-sd"]: 2.25,
-		["treated-n"]: 100,
-		["control-n"]: 100,
+		["treated-n"]: 24,
+		["control-n"]: 24,
 	},
 	["use-se"]: false,
 };
 
-const parseFloatFallback = (value, fallback, positive = false) => {
-	const parsed = parseFloat(value);
-	return isNaN(parsed) || (positive && parsed <= 0) ? fallback : parsed;
-};
-
-const parseIntFallback = (value, fallback, positive = false) => {
-	const parsed = parseInt(value);
-	return isNaN(parsed) || (positive && parsed <= 0) ? fallback : parsed;
-};
-
-const parseSd = (sd, se, n, useSe) => {
-	if (useSe) {
-		return (
-			parseFloatFallback(se, 1, true) *
-			Math.sqrt(parseFloatFallback(n, 1, true))
-		);
-	}
-	return parseFloatFallback(sd, 1, true);
-};
 const processControls = (controls) => {
 	return {
 		a: {
@@ -144,7 +142,7 @@ const validateControls = (processed) => {
 	);
 };
 
-export default class Visualization extends React.PureComponent {
+class SexDependentEffectTool extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -183,7 +181,7 @@ export default class Visualization extends React.PureComponent {
 				},
 				["use-se"]: INITIAL_CONTROLS["use-se"],
 			},
-			colors: constants.COLORS,
+			colors: COLOR_SCHEMES[DEFAULT_COLOR_SCHEME],
 		};
 		this.patternIds = {
 			a: {
@@ -257,7 +255,6 @@ export default class Visualization extends React.PureComponent {
 					patternIds={this.patternIds}
 				/>
 				<ChartGrid>
-					<GroupLabel color={this.state.colors.b.intersect}>{constants.GROUP_NAMES.b}</GroupLabel>
 					<StyledGroupControls
 						controls={this.state.controls}
 						groupControls={this.state.controls.b}
@@ -266,16 +263,18 @@ export default class Visualization extends React.PureComponent {
 						setGroupControls={this.setGroupControls}
 						colors={this.state.colors.b}
 					/>
-					<StyledLargeChart
-						data={data.b}
-						minX={minX}
-						maxX={maxX}
-						patternIds={this.patternIds.b}
-					/>
+					<ChartContainer>
+						<GroupLabel color={this.state.colors.b.intersect}>{constants.GROUP_NAMES.b}</GroupLabel>
+						<LargeChart
+							data={{ a: data.b.treated, b: data.b.control }}
+							minX={minX}
+							maxX={maxX}
+							patternIds={{ a: this.patternIds.b.treated, b: this.patternIds.b.control, intersect: this.patternIds.b.intersect }}
+						/>
+					</ChartContainer>
 					<GroupAnalysis>
-						<EffectSize samples={controls.b} />
+						<EffectSize samples={{ a: controls.b.treated, b: controls.b.control }} />
 					</GroupAnalysis>
-					<GroupLabel color={this.state.colors.a.intersect}>{constants.GROUP_NAMES.a}</GroupLabel>
 					<StyledGroupControls
 						controls={this.state.controls}
 						groupControls={this.state.controls.a}
@@ -284,27 +283,54 @@ export default class Visualization extends React.PureComponent {
 						setGroupControls={this.setGroupControls}
 						colors={this.state.colors.a}
 					/>
-					<StyledLargeChart
-						data={data.a}
-						minX={minX}
-						maxX={maxX}
-						patternIds={this.patternIds.a}
-					/>
+					<ChartContainer>
+						<GroupLabel color={this.state.colors.a.intersect}>{constants.GROUP_NAMES.a}</GroupLabel>
+						<LargeChart
+							data={{ a: data.a.treated, b: data.a.control }}
+							minX={minX}
+							maxX={maxX}
+							patternIds={{ a: this.patternIds.a.treated, b: this.patternIds.a.control, intersect: this.patternIds.a.intersect }}
+						/>
+					</ChartContainer>
 					<GroupAnalysis>
-						<EffectSize samples={controls.a} />
+						<EffectSize samples={{ a: controls.a.treated, b: controls.a.control }} />
 					</GroupAnalysis>
 				</ChartGrid>
 				<Row>
-					<ExportCsv data={data} />
+					<ExportCsv data={{
+						[`${constants.GROUP_NAMES.a} Control`]: data.a.control,
+						[`${constants.GROUP_NAMES.a} Treated`]: data.a.treated,
+						[`${constants.GROUP_NAMES.b} Control`]: data.b.control,
+						[`${constants.GROUP_NAMES.b} Treated`]: data.b.treated,
+					}} label="Export generated normally-distributed data as CSV" />
 				</Row>
-				<Analysis controls={controls} />
+				<AnovaAnalysis controls={controls} />
 				<Row>
 					<ColorControls
 						colors={this.state.colors}
 						setColors={this.setColors}
+						schemes={COLOR_SCHEMES}
+						defaultScheme={DEFAULT_COLOR_SCHEME}
 					/>
 				</Row>
+				<FinePrint>
+					This tool assumes all four underlying populations are normal with equal variance. Effect size is based on Cohen’s <math><mi>d</mi></math>. Overlap is based on Weitzman’s <math><mi>∆</mi></math>.
+				</FinePrint>
 			</>
 		);
 	}
 }
+
+export default props => {
+	return (
+		<>
+			<p>
+				This tool depicts the effect size and percent overlap for
+				within-sex effects of a manipulation or other within-sex
+				factor. Enter the mean, standard deviation, and sample size (<math><mi>n</mi></math>) below for each group. If you have the standard error instead of the standard deviation, check the &ldquo;Use Standard Error&rdquo; box.
+			</p>
+			<Spacer />
+			<SexDependentEffectTool />
+		</>
+	);
+};
