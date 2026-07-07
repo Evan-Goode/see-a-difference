@@ -4,7 +4,7 @@ import _ from "lodash";
 import toast from "react-hot-toast";
 import * as d3 from "d3";
 
-import { Row, Column, Flexed, Spacer, FinePrint } from "../components/common";
+import { Row, Column, Flexed, Spacer, FinePrint, Link } from "../components/common";
 import Controls from "../components/SexDifference/Controls";
 import ColorControls from "../components/SexDifference/ColorControls";
 import Patterns from "../components/SexDifference/Patterns";
@@ -99,7 +99,7 @@ const validateControls = (processed) => {
 	);
 };
 
-class SexDifferenceTool extends React.PureComponent {
+export default class SexDifferenceTool extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -167,6 +167,14 @@ class SexDifferenceTool extends React.PureComponent {
 		const maxX = Math.max(d3.max(data.a, d => d.x), d3.max(data.b, d => d.x));
 		return (
 			<>
+				<p>
+					This tool allows you to see the effect size (<math><mi>d</mi></math>) and percent
+					overlap for any comparison between males and females. Enter the mean
+					and standard deviation below for each group. If you have the
+					standard error instead of the standard deviation, check the box to
+					enter it and the sample size (<math><mi>n</mi></math>).
+				</p>
+				<Spacer />
 				<Patterns
 					colors={this.state.colors}
 					patternIds={this.patternIds}
@@ -237,26 +245,14 @@ class SexDifferenceTool extends React.PureComponent {
 						defaultScheme={DEFAULT_COLOR_SCHEME}
 					/>
 				</Row>
+				<Spacer />
 				<FinePrint>
 					This tool assumes both distributions are normal. Effect size is based on Cohen’s <math><mi>d</mi></math>. Overlap is based on Weitzman’s <math><mi>∆</mi></math>.
+				</FinePrint>
+				<FinePrint>
+					If you use this tool to prepare a publication, please cite: Maney DL. 2016 Perils and pitfalls of reporting sex differences. Phil. Trans. R. Soc. B 371: 20150119. <Link href="https://dx.doi.org/10.1098/rstb.2015.0119">https://dx.doi.org/10.1098/rstb.2015.0119</Link>
 				</FinePrint>
 			</>
 		);
 	}
 }
-
-export default props => {
-	return (
-		<>
-			<p>
-				This tool allows you to see the effect size (<math><mi>d</mi></math>) and percent
-				overlap for any comparison between males and females. Enter the mean
-				and standard deviation below for each group. If you have the
-				standard error instead of the standard deviation, check the box to
-				enter it and the sample size (<math><mi>n</mi></math>).
-			</p>
-			<Spacer />
-			<SexDifferenceTool />
-		</>
-	);
-};

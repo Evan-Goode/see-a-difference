@@ -35,9 +35,9 @@ export default props => {
 	);
 	const percentage = Math.round(100 * overlap);
 	return (
-		<p>
-			<math><mi>d</mi><mo>=</mo><mn>{cohen.toFixed(constants.DECIMAL_PRECISION)}</mn></math> ({describeCohen(cohen)})<br/>
-			<math><mtext>overlap</mtext><mo>=</mo><mn>{percentage}</mn><mo>%</mo></math>
+		<p style={{fontSize: "1.1em"}}>
+			<math><mi>d</mi><mo>=</mo></math>{cohen.toFixed(constants.DECIMAL_PRECISION)} ({describeCohen(cohen)})<br/>
+			overlap <math><mo>=</mo></math> {percentage}%
 		</p>
 	);
 };

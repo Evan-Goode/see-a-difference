@@ -62,7 +62,7 @@ const Nav = styled.nav`
 				position: absolute;
 				bottom: 0;
 				right: 100%;
-				width: 50vw;
+				width: 1000vw;
 				border-bottom: 0.1em solid ${lighten(1 / 2, color)};
 				z-index: 1;
 			}
@@ -71,7 +71,7 @@ const Nav = styled.nav`
 				position: absolute;
 				bottom: 0;
 				left: 100%;
-				width: 50vw;
+				width: 1000vw;
 				border-bottom: 0.1em solid ${lighten(1 / 2, color)};
 				z-index: 1;
 			}
@@ -95,7 +95,7 @@ export default props => {
 				</Nav>
 				<Outlet />
 				<FinePrint>
-					Created by Evan Goode and Donna L. Maney. <Link href="https://github.com/evan-goode/see-a-difference">Source code</Link> is available under AGPLv3. If you use this tool to prepare a publication, please cite: Maney DL. 2016 Perils and pitfalls of reporting sex differences. Phil. Trans. R. Soc. B 371: 20150119. <Link href="https://dx.doi.org/10.1098/rstb.2015.0119">https://dx.doi.org/10.1098/rstb.2015.0119</Link>
+					Created by Evan Goode and Donna L. Maney. <Link href="https://github.com/evan-goode/see-a-difference">Source code</Link> is available under AGPLv3.
 				</FinePrint>
 			</Container>
 		</StyleWrapper>

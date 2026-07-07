@@ -38,6 +38,7 @@ const ChartContainer = styled.div`
 `;
 
 const StyledGroupControls = styled(GroupControls)`
+	font-size: 0.9em;
 	justify-self: end;
 `;
 
@@ -63,16 +64,16 @@ const INITIAL_CONTROLS = {
 		["control-mean"]: 10.1,
 		["treated-sd"]: 1.91,
 		["control-sd"]: 2.06,
-		["treated-n"]: 24,
-		["control-n"]: 24,
+		["treated-n"]: "",
+		["control-n"]: "",
 	},
 	b: {
 		["treated-mean"]: 10.75,
 		["control-mean"]: 9.8,
 		["treated-sd"]: 2,
 		["control-sd"]: 2.25,
-		["treated-n"]: 24,
-		["control-n"]: 24,
+		["treated-n"]: "",
+		["control-n"]: "",
 	},
 	["use-se"]: false,
 };
@@ -88,7 +89,7 @@ const processControls = (controls) => {
 					controls.a["treated-n"],
 					controls["use-se"]
 				),
-				n: parseIntFallback(controls.a["treated-n"], 1, true),
+				n: parseIntFallback(controls.a["treated-n"], null, true),
 			},
 			control: {
 				mean: parseFloatFallback(controls.a["control-mean"], 0),
@@ -98,7 +99,7 @@ const processControls = (controls) => {
 					controls.a["control-n"],
 					controls["use-se"]
 				),
-				n: parseIntFallback(controls.a["control-n"], 1, true),
+				n: parseIntFallback(controls.a["control-n"], null, true),
 			},
 		},
 		b: {
@@ -110,7 +111,7 @@ const processControls = (controls) => {
 					controls.b["treated-n"],
 					controls["use-se"]
 				),
-				n: parseIntFallback(controls.b["treated-n"], 1, true),
+				n: parseIntFallback(controls.b["treated-n"], null, true),
 			},
 			control: {
 				mean: parseFloatFallback(controls.b["control-mean"], 0),
@@ -120,7 +121,7 @@ const processControls = (controls) => {
 					controls.b["control-n"],
 					controls["use-se"]
 				),
-				n: parseIntFallback(controls.b["control-n"], 1, true),
+				n: parseIntFallback(controls.b["control-n"], null, true),
 			},
 		},
 	};
@@ -142,7 +143,7 @@ const validateControls = (processed) => {
 	);
 };
 
-class SexDependentEffectTool extends React.PureComponent {
+export default class SexDependentEffectTool extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -250,6 +251,13 @@ class SexDependentEffectTool extends React.PureComponent {
 		);
 		return (
 			<>
+				<p>
+					This tool depicts the effect size and percent overlap for within-sex effects of a manipulation or other within-sex factor. If the study design is between-subjects (each of the four groups has unique animals or participants), the tool under the graphs can compare the treatment effect between the sexes by comparing them statistically.
+				</p>
+				<p>
+					Enter the mean, standard deviation, and sample size (<math><mi>n</mi></math>) below for each group. If you have the standard error instead of the standard deviation, check the &ldquo;Use Standard Error&rdquo; box.
+				</p>
+				<Spacer />
 				<Patterns
 					colors={this.state.colors}
 					patternIds={this.patternIds}
@@ -302,9 +310,11 @@ class SexDependentEffectTool extends React.PureComponent {
 						[`${constants.GROUP_NAMES.a} Treated`]: data.a.treated,
 						[`${constants.GROUP_NAMES.b} Control`]: data.b.control,
 						[`${constants.GROUP_NAMES.b} Treated`]: data.b.treated,
-					}} label="Export generated normally-distributed data as CSV" />
+					}} label="Export CSV used to make graphs" />
 				</Row>
+				<h3>Is this a sex-dependent effect?</h3>
 				<AnovaAnalysis controls={controls} />
+				{/*
 				<Row>
 					<ColorControls
 						colors={this.state.colors}
@@ -312,25 +322,12 @@ class SexDependentEffectTool extends React.PureComponent {
 						schemes={COLOR_SCHEMES}
 						defaultScheme={DEFAULT_COLOR_SCHEME}
 					/>
-				</Row>
+				</Row>*/}
+				<Spacer />
 				<FinePrint>
-					This tool assumes all four underlying populations are normal with equal variance. Effect size is based on Cohen’s <math><mi>d</mi></math>. Overlap is based on Weitzman’s <math><mi>∆</mi></math>.
+					This tool assumes all four underlying populations are normal with equal variance. Effect size is based on Cohen’s <math><mi>d</mi></math>. Overlap is based on Weitzman’s <math><mi>∆</mi></math>. The ANOVA analysis assumes the study design is between-subjects (each of the four groups has unique animals or participants). Results will not be valid for within-subjects designs (e.g. control males and treated males are the same animals or participants before and after a manipulation).
 				</FinePrint>
 			</>
 		);
 	}
 }
-
-export default props => {
-	return (
-		<>
-			<p>
-				This tool depicts the effect size and percent overlap for
-				within-sex effects of a manipulation or other within-sex
-				factor. Enter the mean, standard deviation, and sample size (<math><mi>n</mi></math>) below for each group. If you have the standard error instead of the standard deviation, check the &ldquo;Use Standard Error&rdquo; box.
-			</p>
-			<Spacer />
-			<SexDependentEffectTool />
-		</>
-	);
-};
