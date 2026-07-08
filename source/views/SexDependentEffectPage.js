@@ -155,11 +155,11 @@ export default class SexDependentEffectTool extends React.PureComponent {
 					["control-sd"]: INITIAL_CONTROLS.a["control-sd"].toString(),
 					["treated-se"]: (
 						INITIAL_CONTROLS.a["treated-sd"] /
-						Math.sqrt(INITIAL_CONTROLS.a["treated-n"])
+						Math.sqrt(parseIntFallback(INITIAL_CONTROLS.a["treated-n"], 1, true))
 					).toString(),
 					["control-se"]: (
 						INITIAL_CONTROLS.a["control-sd"] /
-						Math.sqrt(INITIAL_CONTROLS.a["control-n"])
+						Math.sqrt(parseIntFallback(INITIAL_CONTROLS.a["control-n"], 1, true))
 					).toString(),
 					["treated-n"]: INITIAL_CONTROLS.a["treated-n"],
 					["control-n"]: INITIAL_CONTROLS.a["control-n"],
@@ -171,11 +171,11 @@ export default class SexDependentEffectTool extends React.PureComponent {
 					["control-sd"]: INITIAL_CONTROLS.b["control-sd"].toString(),
 					["treated-se"]: (
 						INITIAL_CONTROLS.b["treated-sd"] /
-						Math.sqrt(INITIAL_CONTROLS.b["treated-n"])
+						Math.sqrt(parseIntFallback(INITIAL_CONTROLS.b["treated-n"], 1, true))
 					).toString(),
 					["control-se"]: (
 						INITIAL_CONTROLS.b["control-sd"] /
-						Math.sqrt(INITIAL_CONTROLS.b["control-n"])
+						Math.sqrt(parseIntFallback(INITIAL_CONTROLS.b["control-n"], 1, true))
 					).toString(),
 					["treated-n"]: INITIAL_CONTROLS.b["treated-n"],
 					["control-n"]: INITIAL_CONTROLS.b["control-n"],

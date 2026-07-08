@@ -81,7 +81,7 @@ export const parseSd = (sd, se, n, useSe) => {
 	if (useSe) {
 		return (
 			parseFloatFallback(se, 1, true) *
-			Math.sqrt(parseFloatFallback(n, 1, true))
+			Math.sqrt(parseIntFallback(n, 1, true))
 		);
 	}
 	return parseFloatFallback(sd, 1, true);
