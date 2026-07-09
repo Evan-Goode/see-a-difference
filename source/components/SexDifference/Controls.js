@@ -44,8 +44,10 @@ const MeanControl = props => {
 const SpreadControls = props => {
 	const seName = `${props.sample}-se`;
 	const nName = `${props.sample}-n`;
+	const sdName = `${props.sample}-sd`;
 	const seId = useId();
 	const nId = useId();
+	const sdId = useId();
 
 	if (props.controls["use-se"]) {
 		return (
@@ -83,8 +85,6 @@ const SpreadControls = props => {
 			</>
 		);
 	}
-	const sdName = `${props.sample}-sd`;
-	const sdId = useId();
 	return (
 		<Tr>
 			<Td>

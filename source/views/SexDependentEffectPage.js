@@ -64,16 +64,16 @@ const INITIAL_CONTROLS = {
 		["control-mean"]: 10.1,
 		["treated-sd"]: 1.91,
 		["control-sd"]: 2.06,
-		["treated-n"]: "",
-		["control-n"]: "",
+		["treated-n"]: "24",
+		["control-n"]: "24",
 	},
 	b: {
 		["treated-mean"]: 10.75,
 		["control-mean"]: 9.8,
 		["treated-sd"]: 2,
 		["control-sd"]: 2.25,
-		["treated-n"]: "",
-		["control-n"]: "",
+		["treated-n"]: "24",
+		["control-n"]: "24",
 	},
 	["use-se"]: false,
 };
@@ -252,7 +252,7 @@ export default class SexDependentEffectTool extends React.PureComponent {
 		return (
 			<>
 				<p>
-					This tool depicts the effect size and percent overlap for within-sex effects of a manipulation or other within-sex factor. If the study design is between-subjects (each of the four groups has unique animals or participants), the tool under the graphs can compare the treatment effect between the sexes by comparing them statistically.
+					This tool depicts the effect size and percent overlap for within-sex effects of a manipulation or other within-sex factor. If each of the four groups has unique animals or participants (between-subjects design), the tool under the graphs can help you decide whether the effect depends on sex.
 				</p>
 				<p>
 					Enter the mean, standard deviation, and sample size (<math><mi>n</mi></math>) below for each group. If you have the standard error instead of the standard deviation, check the &ldquo;Use Standard Error&rdquo; box.
